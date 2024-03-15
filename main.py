@@ -4,7 +4,9 @@ import math
 
 def get_data_from_file(file_name):
     data = dict()
+    repeats = dict()
     data['reads_data'] = dict()
+    data['repeats_number'] = 0
 
     with open(file_name, 'r') as my_file:  # Open the file in read mode using a context manager
         reads_count = 0
@@ -16,6 +18,11 @@ def get_data_from_file(file_name):
                 reads_count += 1
                 is_read_length_line = True
             elif is_read_length_line:
+                if line not in repeats:
+                    repeats[line] = 0
+                else:
+                    data['repeats_number'] += 1
+
                 clean_line = line.replace("\n", "")
                 if len(clean_line) in data['reads_data']:
                     data['reads_data'][len(clean_line)] += 1
@@ -24,7 +31,7 @@ def get_data_from_file(file_name):
                 is_read_length_line = False
 
                 char_count = Counter(line)
-                sum_average += round((char_count['G'] + char_count['C']) / len(clean_line),4)
+                sum_average += round((char_count['G'] + char_count['C']) / len(clean_line),5)
 
     data['reads_count'] = reads_count
     data['gc_average'] = round((sum_average / reads_count) * 100,2)
@@ -41,6 +48,8 @@ def print_data(data):
 
     average = round(sum_length / data['reads_count'])
     print(f"Reads sequence average length = {average}")
+
+    print(f"\nRepeats = {data['repeats_number']}")
 
     print(f"\nGC content average = {data['gc_average']}%")
 
