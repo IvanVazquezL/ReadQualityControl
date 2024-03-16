@@ -7,11 +7,13 @@ def get_data_from_file(file_name):
     repeats = dict()
     data['reads_data'] = dict()
     data['repeats_number'] = 0
+    data['reads_with_n'] = 0
 
     with open(file_name, 'r') as my_file:  # Open the file in read mode using a context manager
         reads_count = 0
         is_read_length_line = False
         sum_average = 0
+        sum_average_ns = 0
 
         for line in my_file:  # Iterate over each line in the file
             if line.startswith('@SRR'):
@@ -31,10 +33,13 @@ def get_data_from_file(file_name):
                 is_read_length_line = False
 
                 char_count = Counter(line)
-                sum_average += round((char_count['G'] + char_count['C']) / len(clean_line),5)
+                sum_average += round((char_count['G'] + char_count['C']) / len(clean_line), 5)
+                sum_average_ns += round(char_count['N'] / len(clean_line), 5)
+                data['reads_with_n'] += 1 if char_count['N'] > 0 else 0
 
     data['reads_count'] = reads_count
-    data['gc_average'] = round((sum_average / reads_count) * 100,2)
+    data['gc_average'] = round((sum_average / reads_count) * 100, 2)
+    data['ns_average'] = round((sum_average_ns / reads_count) * 100, 2)
     return data
 
 
@@ -50,8 +55,10 @@ def print_data(data):
     print(f"Reads sequence average length = {average}")
 
     print(f"\nRepeats = {data['repeats_number']}")
+    print(f"Reads with Ns = {data['reads_with_n']}")
 
     print(f"\nGC content average = {data['gc_average']}%")
+    print(f"Ns per read sequence = {data['ns_average']}%")
 
 
 def main():
